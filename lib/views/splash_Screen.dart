@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 import 'package:quran/containts/Containts.dart';
+import 'package:quran/views/bottomNavigationBar.dart';
 import 'package:quran/views/sura_list_pages.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -15,7 +16,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     Future.delayed(
       Duration(seconds: 5),
-    ).then((value) => Get.off(() => SuraListPages()));
+    ).then((value) => Get.off(() => Bottomnavigationbar()));
 
     // TODO: implement initState
     super.initState();
