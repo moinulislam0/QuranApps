@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/route_manager.dart';
 import 'package:quran/containts/Containts.dart';
+import 'package:share_plus/share_plus.dart';
 
 class Ayatpage extends StatefulWidget {
   final String suras;
@@ -30,6 +32,7 @@ class _AyatpageState extends State<Ayatpage> {
   @override
   void initState() {
     super.initState();
+
     loadAllData();
   }
 
@@ -111,6 +114,52 @@ class _AyatpageState extends State<Ayatpage> {
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
+                SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        // Copy to clipboard
+                        String textToCopy =
+                            "${arabic['ayat']}\n\n${english['text']}\n\n${bangla['text']}";
+                        Clipboard.setData(ClipboardData(text: textToCopy));
+                        Get.snackbar(
+                          "Copied to clipboard",
+                          "Successfully copy",
+                          snackPosition: SnackPosition.TOP,
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            82,
+                            78,
+                            78,
+                          ),
+                          colorText: Colors.white,
+                        );
+                      },
+                      icon: const Icon(Icons.copy),
+                      label: const Text('Copy'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Containts.secondaryColor,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        String textToShare =
+                            "${arabic['ayat']}\n\n${english['text']}\n\n${bangla['text']}";
+                        // ignore: deprecated_member_use
+                        Share.share(textToShare);
+                      },
+                      icon: const Icon(Icons.share),
+                      label: const Text('Share'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Containts.secondaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+
                 const Divider(thickness: 1, color: Colors.black),
               ],
             ),
