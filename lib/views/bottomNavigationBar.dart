@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/state_manager.dart';
 import 'package:quran/containts/Containts.dart';
 import 'package:quran/controller/bottombarController.dart';
-import 'package:quran/views/hadithPage.dart';
+import 'package:quran/views/BmiCalulator.dart';
 import 'package:quran/views/sura_list_pages.dart';
 import 'package:quran/views/weatherPage.dart';
 
@@ -14,7 +14,7 @@ class Bottomnavigationbar extends StatefulWidget {
 }
 
 class _BottomnavigationbarState extends State<Bottomnavigationbar> {
-  List<Widget> screen = [SuraListPages(), Hadithpage(), Weatherpage()];
+  List<Widget> screen = [SuraListPages(), Bmicalulator(), Weatherpage()];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,8 +40,8 @@ class _BottomnavigationbarState extends State<Bottomnavigationbar> {
             items: [
               BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
               BottomNavigationBarItem(
-                icon: Icon(Icons.menu_book_sharp),
-                label: "Hadith",
+                icon: Icon(Icons.calculate_outlined),
+                label: "BMI Calculator",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.cloud),
