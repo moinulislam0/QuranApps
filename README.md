@@ -1,3 +1,7 @@
+
+splash Screen
+<img width="385" height="837" alt="image" src="https://github.com/user-attachments/assets/e8eff7a6-7430-4f14-8cd7-d662a409292e" />
+
 <img width="398" height="818" alt="image" src="https://github.com/user-attachments/assets/d9495c31-4cf5-49be-bfe0-c6d65ecbb863" />
 <img width="395" height="812" alt="image" src="https://github.com/user-attachments/assets/13190a28-c1e1-4012-948d-8084578a08b5" />
 <img width="384" height="836" alt="image" src="https://github.com/user-attachments/assets/c8f79213-69cb-4ab4-af46-362ef5f9b431" />
