@@ -2,20 +2,18 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/route_manager.dart';
 import 'package:quran/containts/Containts.dart';
-import 'package:share_plus/share_plus.dart';
 
 class Ayatpage extends StatefulWidget {
   final String suras;
   final String para;
-  final int Suranumber;
+  final int suraNumber;
   final String totalAytat;
   const Ayatpage({
     super.key,
     required this.suras,
     required this.para,
-    required this.Suranumber,
+    required this.suraNumber,
     required this.totalAytat,
   });
 
@@ -32,7 +30,6 @@ class _AyatpageState extends State<Ayatpage> {
   @override
   void initState() {
     super.initState();
-
     loadAllData();
   }
 
@@ -45,7 +42,7 @@ class _AyatpageState extends State<Ayatpage> {
     List arabicJson = jsonDecode(arData);
     List englishJson = jsonDecode(enData);
 
-    String suraStr = widget.Suranumber.toString();
+    String suraStr = widget.suraNumber.toString();
 
     setState(() {
       banglaList = banglaJson.where((e) => e['sura'] == suraStr).toList();
@@ -53,6 +50,37 @@ class _AyatpageState extends State<Ayatpage> {
       arabicList = arabicJson.where((e) => e['sura'] == suraStr).toList();
       isLoading = false;
     });
+  }
+
+  String _buildVerseLabel(Map arabic) {
+    return "${arabic['sura']}:${arabic['VerseIDAr']}";
+  }
+
+  String _buildShareText(Map arabic, Map english, Map bangla) {
+    return "${widget.suras} | আয়াত ${_buildVerseLabel(arabic)}\n\n${arabic['ayat']}\n\n${english['text']}\n\n${bangla['text']}";
+  }
+
+  void _showMessage(String text, {bool isError = false}) {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(text),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: isError ? const Color(0xFF6B251D) : const Color(0xFF39341E),
+          margin: const EdgeInsets.all(12),
+        ),
+      );
+  }
+
+  Future<void> _copyVerse(Map arabic, Map english, Map bangla) async {
+    final textToCopy = _buildShareText(arabic, english, bangla);
+    await Clipboard.setData(ClipboardData(text: textToCopy));
+    _showMessage("আয়াতটি clipboard-এ কপি হয়েছে");
   }
 
   @override
@@ -67,101 +95,123 @@ class _AyatpageState extends State<Ayatpage> {
     return Scaffold(
       backgroundColor: Containts.primaryColor,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Containts.secondaryColor,
-        title: Center(
-          child: Text(
-            "${widget.suras} (পারা :${widget.para})",
-            style: const TextStyle(color: Colors.white),
-          ),
+        title: Text(
+          "${widget.suras} (পারা: ${widget.para})",
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
       ),
       body: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
         itemCount: arabicList.length,
         itemBuilder: (context, index) {
           final bangla = banglaList[index];
           final arabic = arabicList[index];
           final english = englishList[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: 8),
-                Text(
-                  "${arabic['sura']}:${arabic['VerseIDAr']}",
-                  style: Theme.of(context).textTheme.headlineSmall,
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1F6D6417),
+                  blurRadius: 18,
+                  offset: Offset(0, 8),
                 ),
-                SizedBox(height: 8),
-                Center(
-                  child: Text(
-                    textAlign: TextAlign.right,
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Containts.secondaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Text(
+                          _buildVerseLabel(arabic),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0x14A38D00),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            _showMessage("Audio feature পরে safely add করা হবে");
+                          },
+                          icon: const Icon(
+                            Icons.volume_up_rounded,
+                            color: Color(0xFF8D7D00),
+                            size: 28,
+                          ),
+                          tooltip: 'Audio',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
                     '${arabic['ayat']}',
+                    textAlign: TextAlign.right,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                ),
-                SizedBox(height: 8),
-                Center(
-                  child: Text(
+                  const SizedBox(height: 16),
+                  Text(
                     "${english['text']}",
-                    style: Theme.of(context).textTheme.titleSmall,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-                SizedBox(height: 14),
-                Center(
-                  child: Text(
+                  const SizedBox(height: 14),
+                  Text(
                     '${bangla['text']}',
-                    style: Theme.of(context).textTheme.titleSmall,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        // Copy to clipboard
-                        String textToCopy =
-                            "${arabic['ayat']}\n\n${english['text']}\n\n${bangla['text']}";
-                        Clipboard.setData(ClipboardData(text: textToCopy));
-                        Get.snackbar(
-                          "Copied to clipboard",
-                          "Successfully copy",
-                          snackPosition: SnackPosition.TOP,
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            82,
-                            78,
-                            78,
+                  const SizedBox(height: 18),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      FilledButton.tonalIcon(
+                        onPressed: () => _copyVerse(arabic, english, bangla),
+                        icon: const Icon(Icons.copy_rounded),
+                        label: const Text('Copy'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFF0E57C),
+                          foregroundColor: const Color(0xFF534800),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 14,
                           ),
-                          colorText: Colors.white,
-                        );
-                      },
-                      icon: const Icon(Icons.copy),
-                      label: const Text('Copy'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Containts.secondaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        String textToShare =
-                            "${arabic['ayat']}\n\n${english['text']}\n\n${bangla['text']}";
-                        // ignore: deprecated_member_use
-                        Share.share(textToShare);
-                      },
-                      icon: const Icon(Icons.share),
-                      label: const Text('Share'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Containts.secondaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const Divider(thickness: 1, color: Colors.black),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         },
